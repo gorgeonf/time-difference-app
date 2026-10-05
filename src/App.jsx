@@ -299,7 +299,7 @@ export default function TimeZoneComparer() {
         .tzc-weatherplaceholder { flex: 1 1 220px; min-width: 220px; }
         .tzc-addcard { border: 1px dashed var(--line); border-radius: 12px; flex: 1 1 220px; min-width: 220px; display: flex; align-items: center; justify-content: center; min-height: 120px; background: transparent; cursor: pointer; color: var(--muted); gap: 6px; font-size: 14px; }
         .tzc-addcard:hover { border-color: var(--ref); color: var(--ref); }
-        .tzc-searchwrap { max-width: 900px; margin: 12px auto 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; flex-basis: 100%; }
+        .tzc-searchwrap { flex: 1 1 260px; max-width: 320px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
         .tzc-searchinput { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
         .tzc-searchinput input { border: none; outline: none; font-size: 14px; width: 100%; background: transparent; color: var(--ink); }
         .tzc-results { margin-top: 8px; max-height: 240px; overflow-y: auto; }
@@ -314,7 +314,7 @@ export default function TimeZoneComparer() {
         .tzc-warning-list { margin: 4px 0 0; padding-left: 18px; font-weight: 400; }
         .tzc-availcity { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; flex-wrap: wrap; }
         .tzc-availcity select { border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; font-size: 12px; background: var(--surface); color: var(--ink); }
-        tr.avail-row td { background: var(--ref-bg); border-bottom: 2px solid var(--ref); padding: 8px 6px; }
+        tr.avail-row td { background: var(--ref-bg); border-bottom: 2px solid var(--ref); padding: 8px 6px; position: sticky; top: 33px; z-index: 1; }
         .tzc-resetlink { background: none; border: none; color: var(--ref); font-size: 12px; cursor: pointer; padding: 0; text-decoration: underline; }
         .tzc-gridflex { display: flex; gap: 10px; align-items: flex-start; }
         .tzc-tablescroll { flex: 1; overflow: auto; max-height: 480px; }
@@ -322,11 +322,14 @@ export default function TimeZoneComparer() {
         .tzc-rangebar button { writing-mode: horizontal-tb; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 8px 6px; font-size: 11px; cursor: pointer; color: var(--muted); width: 46px; }
         .tzc-rangebar button.active { border-color: var(--ref); color: var(--ref); background: var(--ref-bg); font-weight: 600; }
         table.tzc-table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 480px; }
-        table.tzc-table th { text-align: center; font-size: 12px; color: var(--muted); font-weight: 600; padding: 6px 10px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--surface); }
+        table.tzc-table th { text-align: center; font-size: 12px; color: var(--muted); font-weight: 600; padding: 6px 10px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--surface); z-index: 2; }
         table.tzc-table th .th-inner { display: flex; align-items: center; justify-content: center; gap: 4px; }
         table.tzc-table td { padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; text-align: center; }
         table.tzc-table td.utc { color: var(--muted); font-family: ui-monospace, "SF Mono", "Roboto Mono", Menlo, monospace; font-size: 12px; text-align: left; }
         table.tzc-table tr.now td { font-weight: 700; }
+        table.tzc-table tr.full-match td { border-top: 2px solid var(--work); border-bottom: 2px solid var(--work); }
+        table.tzc-table tr.full-match td:first-child { border-left: 2px solid var(--work); }
+        table.tzc-table tr.full-match td:last-child { border-right: 2px solid var(--work); }
         .tzc-cell-tag { display: inline-block; padding: 3px 8px; border-radius: 6px; }
         .tzc-cell-tag.work { background: var(--work-bg); color: var(--work); }
         .tzc-cell-tag.work-overlap { background: var(--work-bright-bg); color: var(--work-bright-fg); font-weight: 700; }
@@ -344,12 +347,40 @@ export default function TimeZoneComparer() {
 
         {showClocks && (
           <>
+          {(() => {
+            const searchPanel = (
+              <div className="tzc-searchwrap">
+                <div className="tzc-searchinput">
+                  <Search size={14} color="var(--muted)" />
+                  <input autoFocus placeholder="Search any city (e.g. Lorient, Toulouse...)" value={query} onChange={e => setQuery(e.target.value)} />
+                  <button className="tzc-icon-btn" onClick={closeSearch}><X size={16} /></button>
+                </div>
+                <div className="tzc-results">
+                  {query.trim().length >= 2 && searchLoading && <div className="tzc-result" style={{ color: "var(--muted)" }}>Searching…</div>}
+                  {query.trim().length >= 2 && searchError && (
+                    <div className="tzc-result" style={{ color: "var(--muted)" }}>
+                      City search is blocked in this preview (sandbox network restriction) — it will work once this is deployed.
+                    </div>
+                  )}
+                  {!searchLoading && !searchError && suggestions.map(c => (
+                    <div key={`${c.name}-${c.tz}`} className="tzc-result" onClick={() => selectCity(c)}>
+                      {c.name}{c.region ? `, ${c.region}` : ""} <span>{c.country}</span>
+                    </div>
+                  ))}
+                  {!searchLoading && !searchError && query.trim().length >= 2 && suggestions.length === 0 && (
+                    <div className="tzc-result" style={{ color: "var(--muted)" }}>No matches</div>
+                  )}
+                </div>
+                {query.trim().length < 2 && <div className="tzc-hint">Type at least 2 letters to search any city worldwide. Previously used cities are listed first.</div>}
+              </div>
+            );
+            return (
           <div className="tzc-cities">
             {cities.map((city, i) => {
               const diff = i === 0 ? null : getOffsetMinutes(now, city.tz) - getOffsetMinutes(now, reference.tz);
               return (
+                <React.Fragment key={city.name}>
                 <div
-                  key={city.name}
                   className={`tzc-card${i === 0 ? " is-ref" : ""}${dragIndex === i ? " dragging" : ""}${dragOverIndex === i && dragIndex !== i ? " drag-over" : ""}`}
                   draggable
                   onDragStart={onCardDragStart(i)}
@@ -376,39 +407,17 @@ export default function TimeZoneComparer() {
                   {i === 0 && cities.length > 1 && <div className="tzc-refpill">Reference</div>}
                   {i > 0 && <div className="tzc-diffpill">{formatOffsetDiff(diff)} vs {reference.name}</div>}
                 </div>
+                {editingSlot === i && searchPanel}
+                </React.Fragment>
               );
             })}
             {cities.length < 3 && (
               <button className="tzc-addcard" onClick={openAdd}><Plus size={16} /> Add city</button>
             )}
+            {editingSlot === cities.length && searchPanel}
           </div>
-
-          {editingSlot !== null && (
-            <div className="tzc-searchwrap">
-              <div className="tzc-searchinput">
-                <Search size={14} color="var(--muted)" />
-                <input autoFocus placeholder="Search any city (e.g. Lorient, Toulouse...)" value={query} onChange={e => setQuery(e.target.value)} />
-                <button className="tzc-icon-btn" onClick={closeSearch}><X size={16} /></button>
-              </div>
-              <div className="tzc-results">
-                {query.trim().length >= 2 && searchLoading && <div className="tzc-result" style={{ color: "var(--muted)" }}>Searching…</div>}
-                {query.trim().length >= 2 && searchError && (
-                  <div className="tzc-result" style={{ color: "var(--muted)" }}>
-                    City search is blocked in this preview (sandbox network restriction) — it will work once this is deployed.
-                  </div>
-                )}
-                {!searchLoading && !searchError && suggestions.map(c => (
-                  <div key={`${c.name}-${c.tz}`} className="tzc-result" onClick={() => selectCity(c)}>
-                    {c.name}{c.region ? `, ${c.region}` : ""} <span>{c.country}</span>
-                  </div>
-                ))}
-                {!searchLoading && !searchError && query.trim().length >= 2 && suggestions.length === 0 && (
-                  <div className="tzc-result" style={{ color: "var(--muted)" }}>No matches</div>
-                )}
-              </div>
-              {query.trim().length < 2 && <div className="tzc-hint">Type at least 2 letters to search any city worldwide. Previously used cities are listed first.</div>}
-            </div>
-          )}
+            );
+          })()}
 
           <div className="tzc-weatherrow">
             {cities.map(city => {
@@ -519,7 +528,7 @@ export default function TimeZoneComparer() {
                     })}
                   </tr>
                   {gridRows.map((row, idx) => (
-                    <tr key={idx} className={idx === 0 ? "now" : ""}>
+                    <tr key={idx} className={`${idx === 0 ? "now " : ""}${row.allWorking ? "full-match" : ""}`}>
                       <td className="utc">{formatUTCCell(row.instant)}</td>
                       {row.cells.map(cell => (
                         <td key={cell.city.name}>
