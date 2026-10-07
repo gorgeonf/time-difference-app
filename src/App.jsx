@@ -4,14 +4,14 @@ import { Plus, X, Search, Pencil, ArrowLeftRight, GripVertical, ChevronDown, Che
 // Small non-US-first default suggestion pool, shown before the user types anything.
 // Any city in the world can still be found via the live search (Open-Meteo geocoding).
 const POPULAR_CITIES = [
-  { name: "Vancouver", country: "Canada", tz: "America/Vancouver", lat: 49.28, lon: -123.12 },
-  { name: "London", country: "United Kingdom", tz: "Europe/London", lat: 51.51, lon: -0.13 },
-  { name: "Berlin", country: "Germany", tz: "Europe/Berlin", lat: 52.52, lon: 13.40 },
-  { name: "Toronto", country: "Canada", tz: "America/Toronto", lat: 43.65, lon: -79.38 },
-  { name: "Mumbai", country: "India", tz: "Asia/Kolkata", lat: 19.08, lon: 72.88 },
-  { name: "Singapore", country: "Singapore", tz: "Asia/Singapore", lat: 1.35, lon: 103.82 },
-  { name: "Tokyo", country: "Japan", tz: "Asia/Tokyo", lat: 35.68, lon: 139.69 },
   { name: "Sydney", country: "Australia", tz: "Australia/Sydney", lat: -33.87, lon: 151.21 },
+  { name: "Brisbane", "country": "Australia", "tz": "Australia/Brisbane", "lat": -27.47, "lon": 153.03 },
+  { name: "Melbourne", "country": "Australia", "tz": "Australia/Melbourne", "lat": -37.81, "lon": 144.96 },
+  { name: "Perth", "country": "Australia", "tz": "Australia/Perth", "lat": -31.95, "lon": 115.86 },
+  { name: "Montreal", "country": "Canada", "tz": "America/Montreal", "lat": 45.51, "lon": -73.56 },
+  { name: "Auckland", "country": "New Zealand", "tz": "Pacific/Auckland", "lat": -36.85, "lon": 174.76 },
+  { name: "Vancouver", country: "Canada", tz: "America/Vancouver", lat: 49.28, lon: -123.12 },
+  { name: "Tokyo", country: "Japan", tz: "Asia/Tokyo", lat: 35.68, lon: 139.69 },
 ];
 
 const WEATHER_CODES = {
